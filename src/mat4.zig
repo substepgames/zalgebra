@@ -264,10 +264,14 @@ pub fn Mat4x4(comptime T: type) type {
             return Vector3.new(scale_x.length(), scale_y.length(), scale_z.length());
         }
 
-        /// Construct a perspective 4x4 matrix.
+        // Use depth -1 to 1 for perspective matrix by default, to match OpenGL defaults
+        pub const perspective = perspectiveNegativeOne;
+        pub const perspectiveReversedZ = perspectiveReversedZNegativeOne;
+
+        /// Construct a perspective 4x4 matrix, with a depth from -1 to 1.
         /// Note: Field of view is given in degrees.
         /// Also for more details https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml.
-        pub fn perspective(fovy_in_degrees: T, aspect_ratio: T, z_near: T, z_far: T) Self {
+        pub fn perspectiveNegativeOne(fovy_in_degrees: T, aspect_ratio: T, z_near: T, z_far: T) Self {
             const f = 1 / @tan(root.toRadians(fovy_in_degrees) * 0.5);
             const nf = 1 / (z_near - z_far);
 
@@ -281,11 +285,45 @@ pub fn Mat4x4(comptime T: type) type {
             };
         }
 
-        /// Construct a perspective 4x4 matrix with reverse Z and infinite far plane.
+        /// Construct a perspective 4x4 matrix, with a depth from 0 to 1.
+        /// Note: Field of view is given in degrees.
+        /// Also for more details https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml.
+        pub fn perspectiveZeroOne(fovy_in_degrees: T, aspect_ratio: T, z_near: T, z_far: T) Self {
+            const f = 1 / @tan(root.toRadians(fovy_in_degrees) * 0.5);
+            const nf = 1 / (z_near - z_far);
+
+            return .{
+                .data = .{
+                    .{ f / aspect_ratio, 0, 0, 0 },
+                    .{ 0, f, 0, 0 },
+                    .{ 0, 0, z_far * nf, -1 },
+                    .{ 0, 0, z_near * z_far * nf, 0 },
+                },
+            };
+        }
+
+        /// Construct a perspective 4x4 matrix with reverse Z and infinite far plane, with a depth from -1 to 1.
         /// Note: Field of view is given in degrees.
         /// Also for more details https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml.
         /// For Reversed-Z details https://nlguillemot.wordpress.com/2016/12/07/reversed-z-in-opengl/
-        pub fn perspectiveReversedZ(fovy_in_degrees: T, aspect_ratio: T, z_near: T) Self {
+        pub fn perspectiveReversedZNegativeOne(fovy_in_degrees: T, aspect_ratio: T, z_near: T) Self {
+            const f = 1 / @tan(root.toRadians(fovy_in_degrees) * 0.5);
+
+            return .{
+                .data = .{
+                    .{ f / aspect_ratio, 0, 0, 0 },
+                    .{ 0, f, 0, 0 },
+                    .{ 0, 0, 1, -1 },
+                    .{ 0, 0, 2 * z_near, 0 },
+                },
+            };
+        }
+
+        /// Construct a perspective 4x4 matrix with reverse Z and infinite far plane, with a depth from 0 to 1.
+        /// Note: Field of view is given in degrees.
+        /// Also for more details https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml.
+        /// For Reversed-Z details https://nlguillemot.wordpress.com/2016/12/07/reversed-z-in-opengl/
+        pub fn perspectiveReversedZZeroOne(fovy_in_degrees: T, aspect_ratio: T, z_near: T) Self {
             const f = 1 / @tan(root.toRadians(fovy_in_degrees) * 0.5);
 
             return .{
