@@ -34,29 +34,30 @@ pub fn main () void {
 
 ### Aliases
 
-| Type         | Description                              |
-| ------------ | ---------------------------------------- |
-| Vec2         | Two dimensional vector for `f32`         |
-| Vec2_f64     | Two dimensional vector for `f64`         |
-| Vec2_i32     | Two dimensional vector for `i32`         |
-| Vec2_usize   | Two dimensional vector for `usize`       |
-| Vec3         | Three dimensional vector for `f32`       |
-| Vec3_f64     | Three dimensional vector for `f64`       |
-| Vec3_i32     | Three dimensional vector for `i32`       |
-| Vec3_usize   | Three dimensional vector for `usize`     |
-| Vec4         | Four dimensional vector for `f32`        |
-| Vec4_f64     | Four dimensional vector for `f64`        |
-| Vec4_i32     | Four dimensional vector for `i32`        |
-| Vec4_usize   | Four dimensional vector for `usize`      |
-| Mat3         | 3x3 matrix for `f32`                     |
-| Mat3_f64     | 3x3 matrix for `f64`                     |
-| Mat4         | 4x4 matrix for `f32`                     |
-| Mat4_f64     | 4x4 matrix for `f64`                     |
-| Quat         | Quaternion for `f32`                     |
-| Quat_f64     | Quaternion for `f64`                     |
-| perspective  | Perspective function for `f32` 4x4 mat4  |
-| orthographic | Orthographic function for `f32` 4x4 mat4 |
-| lookAt       | LookAt function for `f32` 4x4 mat4       |
+| Type                 | Description                                                           |
+| -------------------- | --------------------------------------------------------------------- |
+| Vec2                 | Two dimensional vector for `f32`                                      |
+| Vec2_f64             | Two dimensional vector for `f64`                                      |
+| Vec2_i32             | Two dimensional vector for `i32`                                      |
+| Vec2_usize           | Two dimensional vector for `usize`                                    |
+| Vec3                 | Three dimensional vector for `f32`                                    |
+| Vec3_f64             | Three dimensional vector for `f64`                                    |
+| Vec3_i32             | Three dimensional vector for `i32`                                    |
+| Vec3_usize           | Three dimensional vector for `usize`                                  |
+| Vec4                 | Four dimensional vector for `f32`                                     |
+| Vec4_f64             | Four dimensional vector for `f64`                                     |
+| Vec4_i32             | Four dimensional vector for `i32`                                     |
+| Vec4_usize           | Four dimensional vector for `usize`                                   |
+| Mat3                 | 3x3 matrix for `f32`                                                  |
+| Mat3_f64             | 3x3 matrix for `f64`                                                  |
+| Mat4                 | 4x4 matrix for `f32`                                                  |
+| Mat4_f64             | 4x4 matrix for `f64`                                                  |
+| Quat                 | Quaternion for `f32`                                                  |
+| Quat_f64             | Quaternion for `f64`                                                  |
+| perspective          | Perspective function for `f32` 4x4 mat4 with -1 to 1 depth            |
+| perspectiveReversedZ | Reversed-Z perspective function for `f32` 4x4 mat4 with -1 to 1 depth |
+| orthographic         | Orthographic function for `f32` 4x4 mat4                              |
+| lookAt               | LookAt function for `f32` 4x4 mat4                                    |
 
 ### Vectors
 
@@ -105,36 +106,38 @@ pub fn main () void {
 
 Note: All matrices are column-major.
 
-| Methods              | Description                                                                           |
-| -------------------- | ------------------------------------------------------------------------------------- |
-| identity             | Construct an identity matrix                                                          |
-| set                  | Set all matrix values to given value                                                  |
-| fromSlice            | Construct new matrix from given slice of data                                         |
-| getSlice             | Return the inner data as a slice                                                      |
-| transpose            | Return the transpose matrix                                                           |
-| negate               | Scale all components by -1                                                            |
-| cast                 | Cast a type to another type                                                           |
-| eql                  | Return `true` if two matrices are equals                                              |
-| mulByVec4            | Multiply a given vec4 by matrix (only for mat4)                                       |
-| fromTranslate        | Construct a translation matrix                                                        |
-| translate            | Construct a translation from the given matrix according to given axis (vec3)          |
-| fromRotation         | Construct a rotation matrix                                                           |
-| fromEulerAngles      | Construct a rotation matrix from pitch/yaw/roll in degrees (X _ Y _ Z)                |
-| rotate               | Construct a rotation from the given matrix according to given axis (vec3)             |
-| fromScale            | Construct a scale matrix                                                              |
-| scale                | Construct a scale from the given matrix according to given axis (vec3)                |
-| extractTranslation   | Return a vector with proper translation                                               |
-| orthoNormalize       | Ortho normalize the given matrix.                                                     |
-| extractEulerAngles   | Return a vector with Euler angles in degrees (pitch/yaw/roll)                         |
-| extractScale         | Return a vector with proper scale                                                     |
-| perspective          | Construct a perspective matrix from given fovy, aspect ratio, near/far inputs         |
-| perspectiveReversedZ | Construct a perspective matrix with reverse Z and infinite far plane.                 |
-| orthographic         | Construct an orthographic matrix from given left, right, bottom, top, near/far inputs |
-| lookAt               | Construct a right-handed lookAt matrix from given position (eye) and target           |
-| mul                  | Multiply two matrices                                                                 |
-| inv                  | Inverse the given matrix                                                              |
-| recompose            | Return mat4 matrix from given `translation`, `rotation` and `scale` components        |
-| decompose            | Return components `translation`, `rotation` and `scale` from given 4x4 matrix.        |
+| Methods                         | Description                                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| identity                        | Construct an identity matrix                                                                            |
+| set                             | Set all matrix values to given value                                                                    |
+| fromSlice                       | Construct new matrix from given slice of data                                                           |
+| getSlice                        | Return the inner data as a slice                                                                        |
+| transpose                       | Return the transpose matrix                                                                             |
+| negate                          | Scale all components by -1                                                                              |
+| cast                            | Cast a type to another type                                                                             |
+| eql                             | Return `true` if two matrices are equals                                                                |
+| mulByVec4                       | Multiply a given vec4 by matrix (only for mat4)                                                         |
+| fromTranslate                   | Construct a translation matrix                                                                          |
+| translate                       | Construct a translation from the given matrix according to given axis (vec3)                            |
+| fromRotation                    | Construct a rotation matrix                                                                             |
+| fromEulerAngles                 | Construct a rotation matrix from pitch/yaw/roll in degrees (X _ Y _ Z)                                  |
+| rotate                          | Construct a rotation from the given matrix according to given axis (vec3)                               |
+| fromScale                       | Construct a scale matrix                                                                                |
+| scale                           | Construct a scale from the given matrix according to given axis (vec3)                                  |
+| extractTranslation              | Return a vector with proper translation                                                                 |
+| orthoNormalize                  | Ortho normalize the given matrix.                                                                       |
+| extractEulerAngles              | Return a vector with Euler angles in degrees (pitch/yaw/roll)                                           |
+| extractScale                    | Return a vector with proper scale                                                                       |
+| perspectiveNegativeOne          | Construct a perspective matrix from given fovy, aspect ratio, near/far inputs, with -1 to 1 depth range |
+| perspectiveZeroOne              | Construct a perspective matrix from given fovy, aspect ratio, near/far inputs, with 0 to 1 depth range  |
+| perspectiveReversedZNegativeOne | Construct a perspective matrix with reverse Z and infinite far plane, with -1 to 1 depth range          |
+| perspectiveReversedZZeroOne     | Construct a perspective matrix with reverse Z and infinite far plane, with 0 to 1 depth range           |
+| orthographic                    | Construct an orthographic matrix from given left, right, bottom, top, near/far inputs                   |
+| lookAt                          | Construct a right-handed lookAt matrix from given position (eye) and target                             |
+| mul                             | Multiply two matrices                                                                                   |
+| inv                             | Inverse the given matrix                                                                                |
+| recompose                       | Return mat4 matrix from given `translation`, `rotation` and `scale` components                          |
+| decompose                       | Return components `translation`, `rotation` and `scale` from given 4x4 matrix.                          |
 
 ### Quaternions
 
