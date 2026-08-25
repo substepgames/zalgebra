@@ -385,15 +385,13 @@ pub fn Mat4x4(comptime T: type) type {
         /// Matrices' multiplication.
         /// Produce a new matrix from given two matrices.
         pub fn mul(left: Self, right: Self) Self {
-            var result = Self.identity();
-            for (0..result.data.len) |column| {
-                for (0..result.data[column].len) |row| {
+            var result: Mat4 = undefined;
+            inline for (0..result.data.len) |column| {
+                inline for (0..result.data[column].len) |row| {
                     var sum: T = 0;
-
-                    for (0..left.data.len) |left_column| {
+                    inline for (0..left.data.len) |left_column| {
                         sum += left.data[left_column][row] * right.data[column][left_column];
                     }
-
                     result.data[column][row] = sum;
                 }
             }
