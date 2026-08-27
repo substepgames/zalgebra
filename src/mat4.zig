@@ -268,7 +268,7 @@ pub fn Mat4x4(comptime T: type) type {
         pub const perspective = perspectiveNegativeOne;
         pub const perspectiveReversedZ = perspectiveReversedZNegativeOne;
 
-        /// Construct a perspective 4x4 matrix, with a depth from -1 to 1.
+        /// Construct a perspective 4x4 matrix, with a depth [0, 1].
         /// Note: Field of view is given in degrees.
         /// Also for more details https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluPerspective.xml.
         pub fn perspectiveNegativeOne(fovy_in_degrees: T, aspect_ratio: T, z_near: T, z_far: T) Self {
@@ -279,8 +279,8 @@ pub fn Mat4x4(comptime T: type) type {
                 .data = .{
                     .{ f / aspect_ratio, 0, 0, 0 },
                     .{ 0, f, 0, 0 },
-                    .{ 0, 0, (z_near + z_far) * nf, -1 },
-                    .{ 0, 0, 2 * z_near * z_far * nf, 0 },
+                    .{ 0, 0, z_far * nf, -1 },
+                    .{ 0, 0, z_near * z_far * nf, 0 },
                 },
             };
         }
