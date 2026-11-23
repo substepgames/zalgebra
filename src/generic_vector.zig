@@ -1,6 +1,6 @@
 const std = @import("std");
 const root = @import("main.zig");
-const math = std.math;
+const math = @import("math.zig");
 const expectEqual = std.testing.expectEqual;
 const expect = std.testing.expect;
 const panic = std.debug.panic;
@@ -52,8 +52,8 @@ pub fn GenericVector(comptime dimensions: comptime_int, comptime T: type) type {
 
                 /// Rotate vector by angle (in degrees)
                 pub fn rotate(self: Self, angle_in_degrees: T) Self {
-                    const sin_theta = @sin(root.toRadians(angle_in_degrees));
-                    const cos_theta = @cos(root.toRadians(angle_in_degrees));
+                    const sin_theta = math.sin(root.toRadians(angle_in_degrees));
+                    const cos_theta = math.cos(root.toRadians(angle_in_degrees));
                     return .{ .data = [2]T{
                         cos_theta * self.x() - sin_theta * self.y(),
                         sin_theta * self.x() + cos_theta * self.y(),
@@ -273,7 +273,7 @@ pub fn GenericVector(comptime dimensions: comptime_int, comptime T: type) type {
             var result: [dimensions]dest_type = undefined;
 
             inline for (result, 0..) |_, i| {
-                result[i] = math.lossyCast(dest_type, self.data[i]);
+                result[i] = math.math.lossyCast(dest_type, self.data[i]);
             }
             return .{ .data = result };
         }
@@ -464,15 +464,9 @@ pub fn GenericVector(comptime dimensions: comptime_int, comptime T: type) type {
         }
 
         pub fn expectApproxEq(a: Self, b: Self, tolerance: T) !void {
-            var result = true;
-
             inline for (0..dimensions) |i| {
-                const diff = a.data[i] - b.data[i];
-                const abs_diff = @abs(diff);
-                result = result and abs_diff <= tolerance;
+                try std.testing.expectApproxEqAbs(a.data[i], b.data[i], tolerance);
             }
-
-            return expectEqual(true, result);
         }
     };
 }

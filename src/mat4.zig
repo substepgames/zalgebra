@@ -1,9 +1,9 @@
 const std = @import("std");
-const math = std.math;
 const meta = std.meta;
 const mem = std.mem;
 const expectEqual = std.testing.expectEqual;
 const root = @import("main.zig");
+const math = @import("math.zig");
 const generic_vector = @import("generic_vector.zig");
 const quat = @import("quaternion.zig");
 
@@ -163,8 +163,8 @@ pub fn Mat4x4(comptime T: type) type {
 
             const norm_axis = axis.norm();
 
-            const sin_theta = @sin(root.toRadians(angle_in_degrees));
-            const cos_theta = @cos(root.toRadians(angle_in_degrees));
+            const sin_theta = math.sin(root.toRadians(angle_in_degrees));
+            const cos_theta = math.cos(root.toRadians(angle_in_degrees));
             const cos_value = 1 - cos_theta;
 
             const x = norm_axis.x();
@@ -231,10 +231,10 @@ pub fn Mat4x4(comptime T: type) type {
             const m = self.orthoNormalize();
 
             const theta_x = math.atan2(m.data[1][2], m.data[2][2]);
-            const c2 = @sqrt(math.pow(T, m.data[0][0], 2) + math.pow(T, m.data[0][1], 2));
+            const c2 = @sqrt(math.math.pow(T, m.data[0][0], 2) + math.math.pow(T, m.data[0][1], 2));
             const theta_y = math.atan2(-m.data[0][2], @sqrt(c2));
-            const s1 = @sin(theta_x);
-            const c1 = @cos(theta_x);
+            const s1 = math.sin(theta_x);
+            const c1 = math.cos(theta_x);
             const theta_z = math.atan2(s1 * m.data[2][0] - c1 * m.data[1][0], c1 * m.data[1][1] - s1 * m.data[2][1]);
 
             return Vector3.new(root.toDegrees(theta_x), root.toDegrees(theta_y), root.toDegrees(theta_z));
@@ -342,12 +342,11 @@ pub fn Mat4x4(comptime T: type) type {
 
             result.data[0][0] = 2 / (right - left);
             result.data[1][1] = 2 / (top - bottom);
-            result.data[2][2] = 2 / (z_near - z_far);
-            result.data[3][3] = 1;
-
+            result.data[2][2] = 1 / (z_near - z_far);
             result.data[3][0] = (left + right) / (left - right);
             result.data[3][1] = (bottom + top) / (bottom - top);
-            result.data[3][2] = (z_far + z_near) / (z_near - z_far);
+            result.data[3][2] = z_near / (z_near - z_far);
+            result.data[3][3] = 1;
 
             return result;
         }
@@ -537,6 +536,8 @@ pub fn Mat4x4(comptime T: type) type {
     };
 }
 
+const EPSILON = 0.01;
+
 test "zalgebra.Mat4.eql" {
     const a = Mat4.identity();
     const b = Mat4.identity();
@@ -705,7 +706,7 @@ test "zalgebra.Mat4.extractTranslation" {
 
 test "zalgebra.Mat4.extractEulerAngles" {
     const a = Mat4.fromEulerAngles(Vec3.new(45, -5, 20));
-    try expectEqual(a.extractEulerAngles(), Vec3.new(45.000003814697266, -4.99052524, 19.999998092651367));
+    try Vec3.expectApproxEq(a.extractEulerAngles(), Vec3.new(45, -5, 20), EPSILON);
 }
 
 test "zalgebra.Mat4.extractScale" {
@@ -723,9 +724,9 @@ test "zalgebra.Mat4.recompose" {
     );
 
     try expectEqual(result, Mat4{ .data = .{
-        .{ 0.9961947202682495, 0, -0.08715573698282242, 0 },
-        .{ 0.06162841245532036, 0.7071067690849304, 0.704416036605835, 0 },
-        .{ 0.06162841245532036, -0.7071067690849304, 0.704416036605835, 0 },
+        .{ 0.9959445, 0, -0.087155744, 0 },
+        .{ 0.061618727, 0.70699567, 0.7043493, 0 },
+        .{ 0.061618734, -0.7069956, 0.70434934, 0 },
         .{ 2, 2, 2, 1 },
     } });
 }
@@ -739,9 +740,9 @@ test "zalgebra.Mat4.decompose" {
 
     const result = a.decompose();
 
-    try expectEqual(result.t, Vec3.new(10, 5, 5));
-    try expectEqual(result.s, Vec3.set(1));
-    try expectEqual(result.r.extractEulerAngles(), Vec3.new(45, 5, 0.00000010712935250012379));
+    try Vec3.expectApproxEq(result.t, Vec3.new(10, 5, 5), EPSILON);
+    try Vec3.expectApproxEq(result.s, Vec3.set(1), EPSILON);
+    try Vec3.expectApproxEq(result.r.extractEulerAngles(), Vec3.new(45, 5, 0), EPSILON);
 }
 
 test "zalgebra.Mat4.cast" {

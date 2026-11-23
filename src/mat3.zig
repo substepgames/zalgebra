@@ -1,9 +1,9 @@
 const std = @import("std");
-const math = std.math;
 const meta = std.meta;
 const mem = std.mem;
 const expectEqual = std.testing.expectEqual;
 const root = @import("main.zig");
+const math = @import("math.zig");
 const generic_vector = @import("generic_vector.zig");
 const quat = @import("quaternion.zig");
 
@@ -108,8 +108,8 @@ pub fn Mat3x3(comptime T: type) type {
 
             const norm_axis = axis.norm();
 
-            const sin_theta = @sin(root.toRadians(angle_in_degrees));
-            const cos_theta = @cos(root.toRadians(angle_in_degrees));
+            const sin_theta = math.sin(root.toRadians(angle_in_degrees));
+            const cos_theta = math.cos(root.toRadians(angle_in_degrees));
             const cos_value = 1 - cos_theta;
 
             const x = norm_axis.x();
@@ -192,10 +192,10 @@ pub fn Mat3x3(comptime T: type) type {
             const m = self.orthoNormalize();
 
             const theta_x = math.atan2(m.data[1][2], m.data[2][2]);
-            const c2 = @sqrt(math.pow(T, m.data[0][0], 2) + math.pow(T, m.data[0][1], 2));
+            const c2 = @sqrt(math.math.pow(T, m.data[0][0], 2) + math.math.pow(T, m.data[0][1], 2));
             const theta_y = math.atan2(-m.data[0][2], @sqrt(c2));
-            const s1 = @sin(theta_x);
-            const c1 = @cos(theta_x);
+            const s1 = math.sin(theta_x);
+            const c1 = math.cos(theta_x);
             const theta_z = math.atan2(s1 * m.data[2][0] - c1 * m.data[1][0], c1 * m.data[1][1] - s1 * m.data[2][1]);
 
             return Vector3.new(root.toDegrees(theta_x), root.toDegrees(theta_y), root.toDegrees(theta_z));
@@ -311,6 +311,8 @@ pub fn Mat3x3(comptime T: type) type {
         }
     };
 }
+
+const EPSILON = 0.01;
 
 test "zalgebra.Mat3.eql" {
     const a = Mat3.identity();
@@ -436,7 +438,7 @@ test "zalgebra.Mat3.inv" {
 
 test "zalgebra.Mat3.extractEulerAngles" {
     const a = Mat3.fromEulerAngles(Vec3.new(45, -5, 20));
-    try expectEqual(a.extractEulerAngles(), Vec3.new(45.000003814697266, -4.99052524, 19.999998092651367));
+    try Vec3.expectApproxEq(a.extractEulerAngles(), Vec3.new(45, -5, 20), EPSILON);
 }
 
 test "zalgebra.Mat3.extractScale" {

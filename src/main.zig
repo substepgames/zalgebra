@@ -2,9 +2,10 @@
 //!
 const std = @import("std");
 const expectEqual = std.testing.expectEqual;
-const math = std.math;
 
 const generic_vector = @import("generic_vector.zig");
+
+pub const math = @import("math.zig");
 
 pub const Vec2 = generic_vector.Vec2;
 pub const Vec2_f64 = generic_vector.Vec2_f64;

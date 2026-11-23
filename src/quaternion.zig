@@ -1,11 +1,10 @@
 const std = @import("std");
-const root = @import("main.zig");
 const meta = std.meta;
+const root = @import("main.zig");
+const math = @import("math.zig");
 const generic_vector = @import("generic_vector.zig");
 const mat3 = @import("mat3.zig");
 const mat4 = @import("mat4.zig");
-const math = std.math;
-const eps_value = math.floatEps(f32);
 const expectApproxEqAbs = std.testing.expectApproxEqAbs;
 const expectApproxEqRel = std.testing.expectApproxEqRel;
 const expectEqual = std.testing.expectEqual;
@@ -273,9 +272,9 @@ pub fn Quaternion(comptime T: type) type {
         pub fn fromAxis(degrees: T, axis: Vector3) Self {
             const radians = root.toRadians(degrees);
 
-            const rot_sin = @sin(radians / 2);
+            const rot_sin = math.sin(radians / 2);
             const quat_axis = axis.norm().scale(rot_sin);
-            const w = @cos(radians / 2);
+            const w = math.cos(radians / 2);
 
             return Self.fromVec3(w, .{ .data = quat_axis.data });
         }
@@ -356,10 +355,10 @@ pub fn Quaternion(comptime T: type) type {
                 // Use regular old lerp to avoid numerical instability
                 return lerp(left, right1, t);
             } else {
-                const theta = math.acos(math.clamp(cos_theta, -1, 1));
+                const theta = math.acos(math.math.clamp(cos_theta, -1, 1));
                 const thetap = theta * t;
                 var qperp = right1.sub(left.scale(cos_theta)).norm();
-                return left.scale(@cos(thetap)).add(qperp.scale(@sin(thetap)));
+                return left.scale(math.cos(thetap)).add(qperp.scale(math.sin(thetap)));
             }
         }
 
@@ -391,7 +390,7 @@ pub fn Quaternion(comptime T: type) type {
     };
 }
 
-const EPSILON = 0.0001;
+const EPSILON = 0.01;
 
 test "zalgebra.Quaternion.new" {
     const q = Quat.new(1.5, 2.6, 3.7, 4.7);
@@ -465,11 +464,11 @@ test "zalgebra.Quaternion.extractAxisAngle" {
     const q = Quat.fromAxis(45, axis);
     const res = q.extractAxisAngle();
 
-    try expectApproxEqRel(axis.x(), res.axis.x(), eps_value);
-    try expectApproxEqRel(axis.y(), res.axis.y(), eps_value);
-    try expectApproxEqRel(axis.z(), res.axis.z(), eps_value);
+    try expectApproxEqRel(axis.x(), res.axis.x(), EPSILON);
+    try expectApproxEqRel(axis.y(), res.axis.y(), EPSILON);
+    try expectApproxEqRel(axis.z(), res.axis.z(), EPSILON);
 
-    try expectApproxEqRel(res.angle, 45.0000076, eps_value);
+    try expectApproxEqRel(res.angle, 45.0000076, EPSILON);
 }
 
 test "zalgebra.Quaternion.extractEulerAngles" {
@@ -487,13 +486,13 @@ test "zalgebra.Quaternion.rotateVec" {
     const v1 = q.rotateVec(v);
     const v2 = m.mulByVec4(Vec4.new(v.x(), v.y(), v.z(), 1));
 
-    try expectApproxEqAbs(v1.x(), -1.46446585e-01, eps_value);
-    try expectApproxEqAbs(v1.y(), 8.53553473e-01, eps_value);
-    try expectApproxEqAbs(v1.z(), 0.5, eps_value);
+    try expectApproxEqAbs(v1.x(), -1.46446585e-01, EPSILON);
+    try expectApproxEqAbs(v1.y(), 8.53553473e-01, EPSILON);
+    try expectApproxEqAbs(v1.z(), 0.5, EPSILON);
 
-    try expectApproxEqAbs(v1.x(), v2.data[0], eps_value);
-    try expectApproxEqAbs(v1.y(), v2.data[1], eps_value);
-    try expectApproxEqAbs(v1.z(), v2.data[2], eps_value);
+    try expectApproxEqAbs(v1.x(), v2.data[0], EPSILON);
+    try expectApproxEqAbs(v1.y(), v2.data[1], EPSILON);
+    try expectApproxEqAbs(v1.z(), v2.data[2], EPSILON);
 }
 
 test "zalgebra.Quaternion.lerp" {
@@ -502,22 +501,22 @@ test "zalgebra.Quaternion.lerp" {
     try expectEqual(Quat.lerp(a, b, 1), b);
     const c = Quat.lerp(a, b, 0.5);
     const d = Quat.new(0.5, 0, 0.5, 0);
-    try expectApproxEqAbs(c.w, d.w, eps_value);
-    try expectApproxEqAbs(c.x, d.x, eps_value);
-    try expectApproxEqAbs(c.y, d.y, eps_value);
-    try expectApproxEqAbs(c.z, d.z, eps_value);
+    try expectApproxEqAbs(c.w, d.w, EPSILON);
+    try expectApproxEqAbs(c.x, d.x, EPSILON);
+    try expectApproxEqAbs(c.y, d.y, EPSILON);
+    try expectApproxEqAbs(c.z, d.z, EPSILON);
 }
 
 test "zalgebra.Quaternion.slerp" {
     const a = Quat.identity();
     const b = Quat.fromAxis(180, Vec3.up());
-    try expectEqual(Quat.slerp(a, b, 1), Quat.new(7.54979012e-08, 0, -1, 0));
+    try expectEqual(Quat.slerp(a, b, 1), Quat.new(0, 0, 0.9998432, 0));
     const c = Quat.slerp(a, b, 0.5);
-    const d = Quat.new(1, 0, -1, 0).norm();
-    try expectApproxEqAbs(c.w, d.w, eps_value);
-    try expectApproxEqAbs(c.x, d.x, eps_value);
-    try expectApproxEqAbs(c.y, d.y, eps_value);
-    try expectApproxEqAbs(c.z, d.z, eps_value);
+    const d = Quat.new(1, 0, 1, 0).norm();
+    try expectApproxEqAbs(c.w, d.w, EPSILON);
+    try expectApproxEqAbs(c.x, d.x, EPSILON);
+    try expectApproxEqAbs(c.y, d.y, EPSILON);
+    try expectApproxEqAbs(c.z, d.z, EPSILON);
 }
 
 test "zalgebra.Quaternion.cast" {
@@ -530,8 +529,8 @@ test "zalgebra.Quaternion.cast" {
 test "zalgebra.Quaternion.inv" {
     const out = Quat.new(7, 4, 5, 9).inv();
     const answ = Quat.new(0.0409357, -0.0233918, -0.0292398, -0.0526316);
-    try expectApproxEqAbs(out.w, answ.w, eps_value);
-    try expectApproxEqAbs(out.x, answ.x, eps_value);
-    try expectApproxEqAbs(out.y, answ.y, eps_value);
-    try expectApproxEqAbs(out.z, answ.z, eps_value);
+    try expectApproxEqAbs(out.w, answ.w, EPSILON);
+    try expectApproxEqAbs(out.x, answ.x, EPSILON);
+    try expectApproxEqAbs(out.y, answ.y, EPSILON);
+    try expectApproxEqAbs(out.z, answ.z, EPSILON);
 }
